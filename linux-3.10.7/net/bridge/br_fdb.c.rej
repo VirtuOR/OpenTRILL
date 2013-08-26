@@ -1,0 +1,47 @@
+--- linux-2.6.39.4/net/bridge/br_fdb.c	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/bridge/br_fdb.c	2013-04-04 05:19:50.595550872 +0500
+@@ -327,7 +333,8 @@
+ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
+ 					       struct net_bridge_port *source,
+ 					       const unsigned char *addr,
+-					       int is_local)
++					       int is_local,
++					       unsigned short trill_nickname)
+ {
+ 	struct net_bridge_fdb_entry *fdb;
+ 
+@@ -335,6 +342,7 @@
+ 	if (fdb) {
+ 		memcpy(fdb->addr.addr, addr, ETH_ALEN);
+ 		fdb->dst = source;
++		fdb->trill_nickname = trill_nickname; 
+ 		fdb->is_local = is_local;
+ 		fdb->is_static = is_local;
+ 		fdb->ageing_timer = jiffies;
+@@ -366,7 +374,7 @@
+ 		fdb_delete(fdb);
+ 	}
+ 
+-	if (!fdb_create(head, source, addr, 1))
++	if (!fdb_create(head, source, addr, 1,RBRIDGE_NICKNAME_NONE))
+ 		return -ENOMEM;
+ 
+ 	return 0;
+@@ -384,7 +392,7 @@
+ }
+ 
+ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
+-		   const unsigned char *addr)
++		   const unsigned char *addr,unsigned short trill_nickname)
+ {
+ 	struct hlist_head *head = &br->hash[br_mac_hash(addr)];
+ 	struct net_bridge_fdb_entry *fdb;
+@@ -414,7 +422,7 @@
+ 	} else {
+ 		spin_lock(&br->hash_lock);
+ 		if (!fdb_find(head, addr))
+-			fdb_create(head, source, addr, 0);
++			fdb_create(head, source, addr, 0,trill_nickname);
+ 		/* else  we lose race and someone else inserts
+ 		 * it first, don't bother updating
+ 		 */

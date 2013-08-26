@@ -1,0 +1,11 @@
+--- linux-2.6.39.4/net/bridge/br_private.h	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/bridge/br_private.h	2013-04-04 05:14:22.739550911 +0500
+@@ -354,7 +355,7 @@
+ 			 const unsigned char *addr);
+ extern void br_fdb_update(struct net_bridge *br,
+ 			  struct net_bridge_port *source,
+-			  const unsigned char *addr);
++			  const unsigned char *addr,unsigned short trill_nickname);
+ 
+ /* br_forward.c */
+ extern void br_deliver(const struct net_bridge_port *to,

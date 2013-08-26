@@ -1,0 +1,23 @@
+--- linux-2.6.39.4/net/core/dev.c	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/core/dev.c	2013-04-04 05:35:34.975550759 +0500
+@@ -2314,8 +2314,20 @@
+ 	bool contended;
+ 	int rc;
+ 
++   // printk("Packet len = %u\n",skb->len);
++    
++    /*skb_pull(skb,ETH_HLEN);
++    if(eth_hdr(skb)->h_proto == htons(0x22f3))
++    { 
++        skb_push(skb,ETH_HLEN);
++        skb->len += 20;
++    }
++    else
++    skb_push(skb,ETH_HLEN);*/
+ 	qdisc_skb_cb(skb)->pkt_len = skb->len;
++	//printk("cb_packet_len = %u\n",qdisc_skb_cb(skb)->pkt_len);
+ 	qdisc_calculate_pkt_len(skb, q);
++	
+ 	/*
+ 	 * Heuristic to force contended enqueues to serialize on a
+ 	 * separate lock before trying to get qdisc main lock.

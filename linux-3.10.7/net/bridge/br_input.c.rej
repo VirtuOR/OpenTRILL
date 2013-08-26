@@ -1,0 +1,51 @@
+--- linux-2.6.39.4/net/bridge/br_input.c	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/bridge/br_input.c	2013-04-04 05:22:49.163550850 +0500
+@@ -22,9 +28,13 @@
+ #include <linux/etherdevice.h>
+ #include <linux/netfilter_bridge.h>
+ #include "br_private.h"
++#include "trill.h"
+ 
+ /* Bridge group multicast address 802.1d (pg 51). */
+ const u8 br_group_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x00 };
++const u8 broadcast_addr[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
++const u8 all_isis_rbridges[ETH_ALEN] = ALL_ISIS_RBRIDGES;
++const u8 trill_multicast_max_addr[ETH_ALEN] = MULTICAST_MAC_ADDRS_MAX;
+ 
+ /* Hook for brouter */
+ br_should_route_hook_t __rcu *br_should_route_hook __read_mostly;
+@@ -60,10 +70,12 @@
+ 
+ 	if (!p || p->state == BR_STATE_DISABLED)
+ 		goto drop;
+-
++         //if (skb->pkt_type == PACKET_OTHERHOST)
++         //skb = create_trill_header(skb);
+ 	/* insert into forwarding database after filtering to avoid spoofing */
+ 	br = p->br;
+-	br_fdb_update(br, p, eth_hdr(skb)->h_source);
++	
++		//br_fdb_update(br, p, eth_hdr(skb)->h_source,RBRIDGE_NICKNAME_NONE);
+ 
+ 	if (is_multicast_ether_addr(dest) &&
+ 	    br_multicast_rcv(br, p, skb))
+@@ -104,7 +116,9 @@
+ 
+ 	if (skb) {
+ 		if (dst)
++			{			
+ 			br_forward(dst->dst, skb, skb2);
++			}	
+ 		else
+ 			br_flood_forward(br, skb, skb2);
+ 	}
+@@ -124,7 +139,8 @@
+ {
+ 	struct net_bridge_port *p = br_port_get_rcu(skb->dev);
+ 
+-	br_fdb_update(p->br, p, eth_hdr(skb)->h_source);
++		br_fdb_update(p->br, p, eth_hdr(skb)->h_source,RBRIDGE_NICKNAME_NONE);
++
+ 	return 0;	 /* process further */
+ }
+ 

@@ -1,0 +1,96 @@
+--- linux-2.6.39.4/net/core/rtnetlink.c	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/core/rtnetlink.c	2013-04-04 05:38:38.715550739 +0500
+@@ -127,9 +131,10 @@
+ 	else
+ 		tab = NULL;
+ 
+-	if (tab == NULL || tab[msgindex].doit == NULL)
++	if (tab == NULL || tab[msgindex].doit == NULL){
++		printk("\t\t doit is NULL\n");
+ 		tab = rtnl_msg_handlers[PF_UNSPEC];
+-
++	}
+ 	return tab ? tab[msgindex].doit : NULL;
+ }
+ 
+@@ -505,6 +510,8 @@
+ 	[RTM_FAM(RTM_NEWACTION)]    = NLMSG_LENGTH(sizeof(struct tcamsg)),
+ 	[RTM_FAM(RTM_GETMULTICAST)] = NLMSG_LENGTH(sizeof(struct rtgenmsg)),
+ 	[RTM_FAM(RTM_GETANYCAST)]   = NLMSG_LENGTH(sizeof(struct rtgenmsg)),
++	[RTM_FAM(RTM_SETNICK)]		= NLMSG_LENGTH(sizeof(struct rtgenmsg)),
++	[RTM_FAM(RTM_TREEROOT)]		= NLMSG_LENGTH(sizeof(struct rtgenmsg)),
+ };
+ 
+ static const int rta_max[RTM_NR_FAMILIES] =
+@@ -517,6 +524,9 @@
+ 	[RTM_FAM(RTM_NEWTCLASS)]    = TCA_MAX,
+ 	[RTM_FAM(RTM_NEWTFILTER)]   = TCA_MAX,
+ 	[RTM_FAM(RTM_NEWACTION)]    = TCAA_MAX,
++	[RTM_FAM(RTM_SETNICK)]		= 2,
++	[RTM_FAM(RTM_TREEROOT)]		= 1,
++	
+ };
+ 
+ void __rta_fill(struct sk_buff *skb, int attrtype, int attrlen, const void *data)
+@@ -1885,23 +1895,30 @@
+ 	int type;
+ 	int err;
+ 
++	printk("\t\t****rtnetlink_rcv_msg***\n");
++
+ 	type = nlh->nlmsg_type;
+-	if (type > RTM_MAX)
++	if (type > RTM_MAX){
++		printk("\t\t ****rtnetlink msg error \n");
+ 		return -EOPNOTSUPP;
+-
++	}
+ 	type -= RTM_BASE;
+ 
+ 	/* All the messages must have at least 1 byte length */
+-	if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct rtgenmsg)))
++	if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct rtgenmsg))){
++		printk("\t\t ****rtnetlink msg error 1\n");
+ 		return 0;
+-
++	}
+ 	family = ((struct rtgenmsg *)NLMSG_DATA(nlh))->rtgen_family;
++	printk("Family = %d\nType = %d\n",family,type + 16);
+ 	sz_idx = type>>2;
+ 	kind = type&3;
+ 
+-	if (kind != 2 && security_netlink_recv(skb, CAP_NET_ADMIN))
++	//if (kind != 2 && security_netlink_recv(skb, CAP_NET_ADMIN)){
++	if (kind != 2 && !capable(CAP_NET_ADMIN)){
++		printk("\t\t ****rtnetlink msg error 2\n");
+ 		return -EPERM;
+-
++	}
+ 	if (kind == 2 && nlh->nlmsg_flags&NLM_F_DUMP) {
+ 		struct sock *rtnl;
+ 		rtnl_dumpit_func dumpit;
+@@ -1920,9 +1937,10 @@
+ 	memset(rta_buf, 0, (rtattr_max * sizeof(struct rtattr *)));
+ 
+ 	min_len = rtm_min[sz_idx];
+-	if (nlh->nlmsg_len < min_len)
++	if (nlh->nlmsg_len < min_len){
++		printk("\t\t ****rtnetlink msg error 3\n");
+ 		return -EINVAL;
+-
++	}
+ 	if (nlh->nlmsg_len > min_len) {
+ 		int attrlen = nlh->nlmsg_len - NLMSG_ALIGN(min_len);
+ 		struct rtattr *attr = (void *)nlh + NLMSG_ALIGN(min_len);
+@@ -1930,8 +1948,10 @@
+ 		while (RTA_OK(attr, attrlen)) {
+ 			unsigned flavor = attr->rta_type;
+ 			if (flavor) {
+-				if (flavor > rta_max[sz_idx])
++				if (flavor > rta_max[sz_idx]){
++					printk("\t\t ****rtnetlink msg error 4\n");
+ 					return -EINVAL;
++				}	
+ 				rta_buf[flavor-1] = attr;
+ 			}
+ 			attr = RTA_NEXT(attr, attrlen);

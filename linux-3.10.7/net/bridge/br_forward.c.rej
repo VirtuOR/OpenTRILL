@@ -1,0 +1,28 @@
+--- linux-2.6.39.4/net/bridge/br_forward.c	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/net/bridge/br_forward.c	2013-04-04 05:14:22.735550911 +0500
+@@ -48,7 +50,25 @@
+ 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))) {
+ 		kfree_skb(skb);
+ 	} else {
++	    /*printk ("Outside 1");	
++			if(eth_hdr(skb)->h_proto == htons(0x0800) && skb->protocol != htons(0x22f3))
++			{
++				printk("Entery 1");
++		
++				//if(skb->pkt_type == PACKET_OTHERHOST || skb->pkt_type == PACKET_OUTGOING)
++    			//{
++    				printk("Entery 2");
++     				skb = create_trill_header(skb,false,0);
++     				
++					//goto drop;
++					
++					printk("\t\t\tBr_input\n");
++					trill_testing(skb);
++					
++				//}
++			}*/
+ 		skb_push(skb, ETH_HLEN);
++		//trill_testing(skb);
+ 		dev_queue_xmit(skb);
+ 	}
+ 

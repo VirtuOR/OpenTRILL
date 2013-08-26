@@ -1,0 +1,23 @@
+--- linux-2.6.39.4/include/linux/rtnetlink.h	2011-08-04 00:43:28.000000000 +0500
++++ linux-2.6.39.4/include/linux/rtnetlink.h	2013-04-04 05:14:22.735550911 +0500
+@@ -120,8 +120,19 @@
+ 	RTM_SETDCB,
+ #define RTM_SETDCB RTM_SETDCB
+ 
++	RTM_SETNICK = 82,
++#define RTM_SETNICK RTM_SETNICK
++	RTM_GETNICK,
++#define RTM_GETNICK RTM_GETNICK
++	RTM_ADDNICK,
++#define RTM_ADDNICK RTM_ADDNICK
++	RTM_TREEROOT = 86,
++#define RTM_TREEROOT RTM_TREEROOT
++	RTM_LISTNICK,
++#define RTM_LISTNICK RTM_LISTNICK
++
+ 	__RTM_MAX,
+-#define RTM_MAX		(((__RTM_MAX + 3) & ~3) - 1)
++#define RTM_MAX		(((__RTM_MAX + 3)&~3) - 1)
+ };
+ 
+ #define RTM_NR_MSGTYPES	(RTM_MAX + 1 - RTM_BASE)
