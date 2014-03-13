@@ -18,23 +18,30 @@ Commands:
 - apt-get install dia
 
 - cd bridge-utils-1.5/
+- apt-get install autoconf automake autotools-dev libsigsegv2 m4
+- autoheader
+- autoconf
 - ./configure
 - make
 - make install
 
 - cd libmnl-addadf8/
+- apt-get install libltdl-dev libtool
+- ./autogen.sh
 - ./configure
 - make
 - make install
 
-- cd 
-- ./configure
+- cd linux-user-space/quagga-linux-trill/
+- ./configure --enable-user=username --enable-group=usergroup
 - make
 - make install
 
-- cd trill-linux-port/linux-user-space/quagga-linux-trill/isisd/
+- cd linux-user-space/quagga-linux-trill/isisd/
 - make
 - make install
+
+- ldconfig
 - cp trill-linux-port/linux-user-space/trilld.conf /usr/local/etc/
 
 
