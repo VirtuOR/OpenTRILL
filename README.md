@@ -41,6 +41,7 @@ Commands:
 - make
 - make install
 
+- ldconfig
 - cp trill-linux-port/linux-user-space/trilld.conf /usr/local/etc/
 
 

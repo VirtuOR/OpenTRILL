@@ -20,7 +20,9 @@
 #define _LIBBRIDGE_H
 
 #include <sys/socket.h>
-#include <linux/in6.h>
+
+#ifndef _linux/in6_H_
+#define _linux/in6_H_
 #include <linux/if.h>
 #include <linux/if_bridge.h>
 
